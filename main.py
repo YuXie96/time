@@ -74,6 +74,7 @@ def pad_collate(batch):
     tensors, labels = [], []
     # Gather in lists, and encode labels as indices
     for tra, label in batch:
+        tra = tra[:, ::5]
         tensors += [torch.tensor(tra.transpose(), dtype=torch.float)]
         labels += [torch.tensor(label, dtype=torch.int64)]
 
@@ -115,8 +116,8 @@ def get_subset(data_set, inc_targets):
 
 
 if __name__ == '__main__':
-    readout_steps = 10
-    num_classes = 5
+    readout_steps = 1
+    num_classes = 20
     include_targets = list(range(num_classes))
     #
     # include_targets = [1, 4, 7, 14, 16, 18, 19]
