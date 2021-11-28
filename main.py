@@ -141,10 +141,10 @@ if __name__ == '__main__':
         for data, label in train_loader:
             loss = 0.0
             hid = model.init_hidden(batch_s)
-            for t_ in range(data.shape[1]):
+            for t_ in range(data.shape[0]):
                 output, hid = model(data[t_], hid)
 
-                if t_ >= data.shape[1] - readout_steps:
+                if t_ >= data.shape[0] - readout_steps:
                     loss += criterion(output, label)
             optimizer.zero_grad()
             loss /= readout_steps
@@ -158,9 +158,9 @@ if __name__ == '__main__':
         with torch.no_grad():
             for data, label in test_loader:
                 hid = model.init_hidden(batch_s)
-                for t_ in range(data.shape[1]):
+                for t_ in range(data.shape[0]):
                     output, hid = model(data[t_], hid)
-                    if t_ >= data.shape[1] - readout_steps:
+                    if t_ >= data.shape[0] - readout_steps:
                         _, predicted = torch.max(output.data, 1)
                         total += label.size(0)
                         correct += (predicted == label).sum().item()
@@ -177,9 +177,9 @@ if __name__ == '__main__':
     with torch.no_grad():
         for data, label in test_loader:
             hid = model.init_hidden(batch_s)
-            for t_ in range(data.shape[1]):
+            for t_ in range(data.shape[0]):
                 output, hid = model(data[t_], hid)
-                if t_ >= data.shape[1] - readout_steps:
+                if t_ >= data.shape[0] - readout_steps:
                     _, predictions = torch.max(output.data, 1)
                     # collect the correct predictions for each class
                     for lab, prediction in zip(label, predictions):
