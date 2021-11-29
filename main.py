@@ -37,8 +37,16 @@ if __name__ == '__main__':
     readout_steps = 1
     num_classes = 20
     batch_s = 20
+    use_velocity = True
 
-    trans = transforms.Compose([SkipTransform(skip_num=8)])
+    if use_velocity:
+        # classification based on velocity
+        trans = transforms.Compose([TrimZeros(),
+                                    SkipTransform(skip_num=2)])
+    else:
+        trans = transforms.Compose([TrimZeros(),
+                                    SkipTransform(skip_num=2),
+                                    CumSum()])
 
     train_data = CharacterTrajectoriesDataset(large_split=True, transform=trans)
     test_data = CharacterTrajectoriesDataset(large_split=False, transform=trans)
