@@ -4,7 +4,8 @@ import torch.nn as nn
 from torch.nn.utils import clip_grad_norm_
 from torchvision import transforms
 
-from data_util import CharacterTrajectoriesDataset, pad_collate, SkipTransform
+from data_util import CharacterTrajectoriesDataset, pad_collate,\
+    SkipTransform, TrimZeros, CumSum
 from models import RNNModel
 
 
