@@ -2,8 +2,9 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from torch.nn.utils import clip_grad_norm_
+from torchvision import transforms
 
-from data_util import CharacterTrajectoriesDataset, pad_collate
+from data_util import CharacterTrajectoriesDataset, pad_collate, SkipTransform
 from models import RNNModel
 
 
@@ -35,17 +36,17 @@ def grad_clipping(model, max_norm, printing=False):
 if __name__ == '__main__':
     readout_steps = 1
     num_classes = 20
-    # include_targets = list(range(num_classes))
-
-    train_data = CharacterTrajectoriesDataset(train=False)
-    test_data = CharacterTrajectoriesDataset()
-
-    # train_data = get_subset(train_data, include_targets)
-    # test_data = get_subset(test_data, include_targets)
-
     batch_s = 20
-    train_loader = DataLoader(train_data, batch_size=batch_s, collate_fn=pad_collate, drop_last=True)
-    test_loader = DataLoader(test_data, batch_size=batch_s, shuffle=False, collate_fn=pad_collate, drop_last=True)
+
+    trans = transforms.Compose([SkipTransform(skip_num=8)])
+
+    train_data = CharacterTrajectoriesDataset(large_split=True, transform=trans)
+    test_data = CharacterTrajectoriesDataset(large_split=False, transform=trans)
+
+    train_loader = DataLoader(train_data, batch_size=batch_s, shuffle=True,
+                              collate_fn=pad_collate, drop_last=True)
+    test_loader = DataLoader(test_data, batch_size=batch_s, shuffle=False,
+                             collate_fn=pad_collate, drop_last=True)
 
     criterion = nn.CrossEntropyLoss()
     model = RNNModel(3, 64, num_classes)

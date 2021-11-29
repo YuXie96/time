@@ -4,11 +4,13 @@ from configs.config_global import DEVICE
 
 
 class RNNModel(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, use_LSTM=True):
+    def __init__(self, input_size, hidden_size, output_size, rnn_type='LSTM'):
         super(RNNModel, self).__init__()
-        self.use_LSTM = use_LSTM
+        assert rnn_type in ['LSTM', 'GRU'], 'Given RNN type must be implemented'
         self.hidden_size = hidden_size
-        if self.use_LSTM:
+        self.rnn_type = rnn_type
+
+        if self.rnn_type == 'LSTM':
             self.rnn = nn.LSTMCell(input_size, hidden_size)
         else:
             self.rnn = nn.GRUCell(input_size, hidden_size)
@@ -16,7 +18,7 @@ class RNNModel(nn.Module):
 
     def forward(self, inp, hidden_in):
         hid_out = self.rnn(inp, hidden_in)
-        if self.use_LSTM:
+        if self.rnn_type == 'LSTM':
             rnn_out = hid_out[0]
         else:
             rnn_out = hid_out
@@ -24,7 +26,7 @@ class RNNModel(nn.Module):
         return otp, hid_out
 
     def init_hidden(self, batch_s):
-        if self.use_LSTM:
+        if self.rnn_type == 'LSTM':
             init_hid = (torch.zeros(batch_s, self.hidden_size).to(DEVICE),
                         torch.zeros(batch_s, self.hidden_size).to(DEVICE))
         else:
