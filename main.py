@@ -74,8 +74,8 @@ if __name__ == '__main__':
                     loss += criterion(output, label)
             optimizer.zero_grad()
             loss /= readout_steps
-            grad_clipping(model, 1.0)
             loss.backward()
+            grad_clipping(model, 1.0)
             optimizer.step()
 
         print(loss.item())
