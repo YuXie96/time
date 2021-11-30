@@ -45,6 +45,8 @@ if __name__ == '__main__':
         trans = transforms.Compose([TrimZeros(),
                                     SkipTransform(skip_num=2)])
     else:
+        # classification based on trajectory
+        # TODO: should normalize trajectory
         trans = transforms.Compose([TrimZeros(),
                                     SkipTransform(skip_num=2),
                                     CumSum()])
