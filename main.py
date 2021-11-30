@@ -5,7 +5,7 @@ from torch.nn.utils import clip_grad_norm_
 from torchvision import transforms
 
 from data_util import CharacterTrajectoriesDataset, pad_collate,\
-    SkipTransform, TrimZeros, CumSum
+    SkipTransform, TrimZeros, CumSum, char_list
 from models import RNNModel
 
 
@@ -37,7 +37,7 @@ def grad_clipping(model, max_norm, printing=False):
 if __name__ == '__main__':
     readout_steps = 1
     num_classes = 20
-    batch_s = 20
+    batch_s = 10
     use_velocity = True
 
     if use_velocity:
@@ -63,13 +63,12 @@ if __name__ == '__main__':
     model = RNNModel(3, 64, num_classes)
     optimizer = torch.optim.Adam(model.parameters())
 
-    for ep in range(100):
+    for ep in range(20):
         for data, label in train_loader:
             loss = 0.0
             hid = model.init_hidden(batch_s)
             for t_ in range(data.shape[0]):
                 output, hid = model(data[t_], hid)
-
                 if t_ >= data.shape[0] - readout_steps:
                     loss += criterion(output, label)
             optimizer.zero_grad()
@@ -78,37 +77,39 @@ if __name__ == '__main__':
             grad_clipping(model, 1.0)
             optimizer.step()
 
+        # TODO: here is only printing loss from the latest trial
         print(loss.item())
+        # testing at the end of each epoch
         correct = 0
         total = 0
         with torch.no_grad():
-            for data, label in test_loader:
+            for test_data, test_label in test_loader:
                 hid = model.init_hidden(batch_s)
-                for t_ in range(data.shape[0]):
-                    output, hid = model(data[t_], hid)
-                    if t_ >= data.shape[0] - readout_steps:
-                        _, predicted = torch.max(output.data, 1)
-                        total += label.size(0)
-                        correct += (predicted == label).sum().item()
-
+                for t_ in range(test_data.shape[0]):
+                    output, hid = model(test_data[t_], hid)
+                    if t_ >= test_data.shape[0] - readout_steps:
+                        _, predicted = torch.max(output.detach(), 1)
+                        total += test_label.size(0)
+                        correct += (predicted == test_label).sum().item()
         print('Accuracy of the network on the test set: %d %%' % (
                 100 * correct / total))
 
     # prepare to count predictions for each class
-    classes = list(range(num_classes))
+    # classes = list(range(num_classes))
+    classes = char_list
     correct_pred = {classname: 0 for classname in classes}
     total_pred = {classname: 0 for classname in classes}
 
     # again no gradients needed
     with torch.no_grad():
-        for data, label in test_loader:
+        for test_data, test_label in test_loader:
             hid = model.init_hidden(batch_s)
-            for t_ in range(data.shape[0]):
-                output, hid = model(data[t_], hid)
-                if t_ >= data.shape[0] - readout_steps:
-                    _, predictions = torch.max(output.data, 1)
+            for t_ in range(test_data.shape[0]):
+                output, hid = model(test_data[t_], hid)
+                if t_ >= test_data.shape[0] - readout_steps:
+                    _, predictions = torch.max(output.detach(), 1)
                     # collect the correct predictions for each class
-                    for lab, prediction in zip(label, predictions):
+                    for lab, prediction in zip(test_label, predictions):
                         if lab == prediction:
                             correct_pred[classes[lab]] += 1
                         total_pred[classes[lab]] += 1
