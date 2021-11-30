@@ -55,7 +55,7 @@ def pad_collate(batch):
     # Gather in lists, and encode labels as indices
     for tra, label in batch:
         tensors += [torch.tensor(tra.transpose(), dtype=torch.float)]
-        labels += [torch.tensor(label, dtype=torch.int64)]
+        labels += [torch.tensor(label, dtype=torch.long)]
 
     # Group the list of tensors into a batched tensor
     tensors = [tensor.flip(dims=(0, )) for tensor in tensors]
