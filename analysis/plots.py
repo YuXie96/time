@@ -1,10 +1,14 @@
 import os.path as osp
 
 import matplotlib.pyplot as plt
+import matplotlib
 
 from configs.config_global import FIG_DIR
 
 plt.rcParams.update({'font.size': 16})
+# matplotlib.rcParams['pdf.fonttype'] = 42
+# matplotlib.rcParams['ps.fonttype'] = 42
+
 line_styles = ['-', '--', ':']
 # Default colors
 # colors = ['red', 'tomato', 'green', 'lightgreen', 'blue', 'lightblue']
@@ -37,7 +41,7 @@ def plot_train_log_loss(data, exp_name):
     ax.spines['top'].set_visible(False)
 
     plt.tight_layout(pad=0.5)
-    plt.savefig(osp.join(FIG_DIR, exp_name + 'train_log_loss.pdf'))
+    plt.savefig(osp.join(FIG_DIR, exp_name + 'train_log_loss.pdf'), transparent=True)
 
 
 # Plot testing accuracy recorded during training
@@ -64,4 +68,4 @@ def plot_train_log_acc(data, exp_name):
     ax.spines['top'].set_visible(False)
 
     plt.tight_layout(pad=0.5)
-    plt.savefig(osp.join(FIG_DIR, exp_name + 'train_log_acc.pdf'))
+    plt.savefig(osp.join(FIG_DIR, exp_name + 'train_log_acc.pdf'), transparent=True)
