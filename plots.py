@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
-from torchvision import utils
 from data_util import num2chr
 
 
