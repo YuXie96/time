@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from data_util import num2chr
+from utils.data_util import num2chr
 
 
 def show_tra_3d(tra):

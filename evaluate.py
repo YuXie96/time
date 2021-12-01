@@ -1,5 +1,5 @@
 import torch
-from data_util import char_list
+from utils.data_util import char_list
 from utils.train_util import data_init, model_init
 
 
