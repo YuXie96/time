@@ -21,6 +21,7 @@ from configs.configs import BaseConfig
 from utils.config_utils import vary_config
 
 from analysis.train_analysis import plot_train_log
+from evaluate import eval_class_acc
 
 
 def init_analysis(configs_):
@@ -43,3 +44,15 @@ def test():
     config_ranges = OrderedDict()
     configs = vary_config(config, config_ranges, mode='combinatorial')
     return configs
+
+
+# -----------------------------------------------------
+# analysis
+# -----------------------------------------------------
+
+def test_analysis():
+    configs = test()
+    init_analysis(configs)
+
+    for cfg in configs:
+        eval_class_acc(cfg)

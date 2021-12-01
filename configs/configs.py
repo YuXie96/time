@@ -15,7 +15,17 @@ class BaseConfig(object):
         self.save_path = None
 
         # max norm of grad clipping, eg. 1.0 or None
-        self.grad_clip = None
+        self.grad_clip = 1.0
+        self.readout_steps = 1
+        self.batch_s = 20
+        self.use_velocity = True
+        self.num_ep = 20
+        self.max_batch = 30000
+
+        self.save_every = 100
+        self.log_every = 100
+        self.early_stop = False
+        self.eslen = 5
 
         # basic training parameters
 
