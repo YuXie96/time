@@ -5,10 +5,9 @@ import torch
 import torch.nn as nn
 
 from configs.config_global import USE_CUDA, LOG_LEVEL
-from train_util import grad_clipping
 from utils.config_utils import load_config
 from utils.logger import Logger
-from train_util import data_init, model_init
+from utils.train_util import data_init, model_init, grad_clipping
 
 
 def train_from_path(path):

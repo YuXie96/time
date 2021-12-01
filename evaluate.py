@@ -1,6 +1,6 @@
 import torch
 from data_util import char_list
-from train_util import data_init, model_init
+from utils.train_util import data_init, model_init
 
 
 def eval_class_acc(config):
