@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from torchvision import transforms
 from data_util import CharacterTrajectoriesDataset, pad_collate,\
-    SkipTransform, TrimZeros, CumSum
+    SkipTransform, TrimZeros, CumSum, Scale, TimeScalePos, TimeScaleVel
 from models import RNNModel
 from configs.config_global import DEVICE, MAP_LOC
 
@@ -45,15 +45,17 @@ def data_init(mode, use_velocity, batch_s):
 
     # initialize dataset and data transforms
     if use_velocity:
-        # classification based on velocity
-        trans = transforms.Compose([TrimZeros(),
-                                    SkipTransform(skip_num=2)])
-    else:
-        # classification based on trajectory
-        # TODO: should normalize trajectory
+        # classification based on velocity trajectory
         trans = transforms.Compose([TrimZeros(),
                                     SkipTransform(skip_num=2),
-                                    CumSum()])
+                                    TimeScaleVel(1.0)])
+    else:
+        # classification based on position trajectory
+        trans = transforms.Compose([TrimZeros(),
+                                    SkipTransform(skip_num=2),
+                                    CumSum(),
+                                    Scale(scale=0.1),
+                                    TimeScalePos(1.0)])
 
     data_set = CharacterTrajectoriesDataset(large_split=mode_flag, transform=trans)
     data_loader = DataLoader(data_set, batch_size=batch_s, shuffle=mode_flag,

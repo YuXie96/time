@@ -17,6 +17,7 @@ char_list = ['a', 'b', 'c', 'd', 'e',
 def num2chr(num):
     return char_list[num]
 
+
 # get subset of the original dataset based on target
 # example usage: train_data = get_subset(train_data, include_targets)
 def get_subset(data_set, inc_targets):
@@ -47,6 +48,53 @@ class TrimZeros(object):
 class CumSum(object):
     def __call__(self, tra):
         return np.cumsum(tra, axis=1)
+
+
+def pos_interp(trajectory, t_scale):
+    ret_trajectory = []
+    for row in range(trajectory.shape[0]):
+        row_data = trajectory[row]
+        len_data = len(row_data)
+        ret_row = np.interp(np.linspace(0, len_data - 1, round(len_data / t_scale)),
+                            np.linspace(0, len_data - 1, len_data), row_data)
+        ret_trajectory.append(ret_row)
+    return np.stack(ret_trajectory)
+
+
+# stretch position data, linear interpolation
+class TimeScalePos(object):
+    def __init__(self, t_scale):
+        self.t_scale = t_scale
+
+    def __call__(self, tra):
+        if self.t_scale == 1.0:
+            ret_tra = tra
+        else:
+            ret_tra = pos_interp(tra, t_scale=self.t_scale)
+        return ret_tra
+
+
+class TimeScaleVel(object):
+    def __init__(self, t_scale):
+        self.t_scale = t_scale
+
+    def __call__(self, tra):
+        if self.t_scale == 1.0:
+            ret_tra = tra
+        else:
+            pos_tra = np.cumsum(tra, axis=1)
+            int_pos_tra = pos_interp(pos_tra, t_scale=self.t_scale)
+            ret_tra = np.diff(int_pos_tra, axis=1, prepend=0)
+        return ret_tra
+
+
+# scale
+class Scale(object):
+    def __init__(self, scale):
+        self.scale = scale
+
+    def __call__(self, tra):
+        return tra * self.scale
 
 
 def pad_collate(batch):
