@@ -27,11 +27,13 @@ def model_train(config):
 
     # gradient clipping
     if config.grad_clip is not None:
-        logging.info("Performs grad clipping with max norm {}" + str(config.grad_clip))
+        logging.info("Performs grad clipping with max norm {}".format(config.grad_clip))
 
     # initialize data loaders
-    train_loader = data_init(mode='train', use_velocity=config.use_velocity, batch_s=config.batch_s)
-    test_loader = data_init(mode='test', use_velocity=config.use_velocity, batch_s=config.batch_s)
+    train_loader = data_init(mode='train', use_velocity=config.use_velocity,
+                             t_scale=config.t_scale, batch_s=config.batch_s)
+    test_loader = data_init(mode='test', use_velocity=config.use_velocity,
+                            t_scale=config.t_scale, batch_s=config.batch_s)
 
     # initialize model
     model = model_init(mode='train')

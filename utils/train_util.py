@@ -4,7 +4,7 @@ from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 
 from torchvision import transforms
-from data_util import CharacterTrajectoriesDataset, pad_collate,\
+from utils.data_util import CharacterTrajectoriesDataset, pad_collate,\
     SkipTransform, TrimZeros, CumSum, Scale, TimeScalePos, TimeScaleVel
 from models import RNNModel
 from configs.config_global import DEVICE, MAP_LOC
@@ -35,7 +35,7 @@ def grad_clipping(model, max_norm, printing=False):
             print("after: ", grad_after)
 
 
-def data_init(mode, use_velocity, batch_s):
+def data_init(mode, use_velocity, t_scale, batch_s):
     if mode == 'train':
         mode_flag = True
     elif mode == 'test':
@@ -48,14 +48,14 @@ def data_init(mode, use_velocity, batch_s):
         # classification based on velocity trajectory
         trans = transforms.Compose([TrimZeros(),
                                     SkipTransform(skip_num=2),
-                                    TimeScaleVel(1.0)])
+                                    TimeScaleVel(t_scale)])
     else:
         # classification based on position trajectory
         trans = transforms.Compose([TrimZeros(),
                                     SkipTransform(skip_num=2),
                                     CumSum(),
                                     Scale(scale=0.1),
-                                    TimeScalePos(1.0)])
+                                    TimeScalePos(t_scale)])
 
     data_set = CharacterTrajectoriesDataset(large_split=mode_flag, transform=trans)
     data_loader = DataLoader(data_set, batch_size=batch_s, shuffle=mode_flag,

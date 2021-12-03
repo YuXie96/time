@@ -69,3 +69,20 @@ def plot_train_log_acc(data, exp_name):
 
     plt.tight_layout(pad=0.5)
     plt.savefig(osp.join(FIG_DIR, exp_name + 'train_log_acc.pdf'), transparent=True)
+
+
+def plot_gen(tscales, accs):
+    plt.figure()
+    plt.plot(tscales, accs)
+
+    plt.ylim([0, 100])
+    plt.xlabel('Time Scales')
+    plt.ylabel('Test Accuracy')
+
+    ax = plt.gca()
+    # Hide the right and top spines
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+
+    plt.tight_layout(pad=0.5)
+    plt.savefig(osp.join(FIG_DIR, 'time_scale_gen.pdf'), transparent=True)

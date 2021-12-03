@@ -18,7 +18,6 @@ class BaseConfig(object):
         self.grad_clip = 1.0
         self.readout_steps = 1
         self.batch_s = 20
-        self.use_velocity = True
         self.num_ep = 20
         self.max_batch = 30000
 
