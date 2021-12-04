@@ -9,7 +9,7 @@ def eval_total_acc(config):
                             t_scale=config.t_scale, batch_s=config.batch_s)
 
     # initialize model
-    model = model_init(mode='test', save_path=config.save_path)
+    model = model_init(mode='test', model_type=config.rnn_type, save_path=config.save_path)
 
     correct = 0
     total = 0
@@ -34,7 +34,7 @@ def eval_class_acc(config):
                             t_scale=config.t_scale, batch_s=config.batch_s)
 
     # initialize model
-    model = model_init(mode='test', save_path=config.save_path)
+    model = model_init(mode='test', model_type=config.rnn_type, save_path=config.save_path)
 
     # prepare to count predictions for each class
     classes = char_list

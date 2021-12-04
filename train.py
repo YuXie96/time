@@ -36,7 +36,7 @@ def model_train(config):
                             t_scale=config.t_scale, batch_s=config.batch_s)
 
     # initialize model
-    model = model_init(mode='train')
+    model = model_init(mode='train', model_type=config.rnn_type)
 
     # initialize training
     optimizer = torch.optim.Adam(model.parameters())

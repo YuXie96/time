@@ -71,7 +71,7 @@ def plot_train_log_acc(data, exp_name):
     plt.savefig(osp.join(FIG_DIR, exp_name + 'train_log_acc.pdf'), transparent=True)
 
 
-def plot_gen(tscales, accs):
+def plot_gen(tscales, accs, append_str):
     plt.figure()
     plt.plot(tscales, accs)
 
@@ -85,4 +85,4 @@ def plot_gen(tscales, accs):
     ax.spines['top'].set_visible(False)
 
     plt.tight_layout(pad=0.5)
-    plt.savefig(osp.join(FIG_DIR, 'time_scale_gen.pdf'), transparent=True)
+    plt.savefig(osp.join(FIG_DIR, 'time_scale_gen' + append_str + '.pdf'), transparent=True)

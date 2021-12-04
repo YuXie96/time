@@ -64,8 +64,9 @@ def data_init(mode, use_velocity, t_scale, batch_s):
     return data_loader
 
 
-def model_init(mode, save_path=None):
-    model = RNNModel(3, 64, 20)
+def model_init(mode, model_type, save_path=None):
+    model = RNNModel(input_size=3, hidden_size=64,
+                     output_size=20, rnn_type=model_type)
     model = model.to(DEVICE)
 
     if mode == 'train':
