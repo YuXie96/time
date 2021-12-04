@@ -50,6 +50,54 @@ class CumSum(object):
         return np.cumsum(tra, axis=1)
 
 
+def normal_pdf(bins, mu=0, sigma=1):
+    return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(- (bins - mu) ** 2 / (2 * sigma ** 2))
+
+
+def clock_code(len_tra, width):
+    rows = []
+    x_axis = np.arange(len_tra)
+    for r_ in range(width):
+        row_code = normal_pdf(x_axis, r_ * len_tra / (width - 1))
+        rows.append(row_code)
+    return np.stack(rows)
+
+
+class TemporalContext(object):
+    def __init__(self, context, width, t_scale):
+        assert context in ['zero', 'noise', 'scalar', 'ramping',
+                           'clock', 'stairs_end', 'stairs_start'],\
+            'temporal context must be implemented'
+        self.context = context
+        assert width > 1, 'width must be greater than 1'
+        self.width = width
+        self.t_scale = t_scale
+
+    def __call__(self, tra):
+        tra_len = tra.shape[1]
+        if self.context == 'zero':
+            time_code = np.zeros((self.width, tra_len))
+        elif self.context == 'noise':
+            # might not be true random when using multiple worker to load data
+            time_code = np.random.randn(self.width, tra_len)
+        elif self.context == 'scalar':
+            time_code = np.ones((self.width, tra_len)) * self.t_scale
+        elif self.context == 'ramping':
+            row_code = np.linspace(0, 1, tra_len)
+            time_code = np.stack([row_code for w_ in range(self.width)])
+        elif self.context == 'clock':
+            time_code = clock_code(tra_len, self.width)
+        elif self.context == 'stairs_end':
+            time_code = clock_code(tra_len, self.width).cumsum(axis=1)
+        elif self.context == 'stairs_start':
+            time_code = clock_code(tra_len, self.width).cumsum(axis=1)
+            time_code = np.flip(time_code, axis=1)
+        else:
+            raise NotImplementedError('context not implemented')
+        ret_tra = np.concatenate((tra, time_code))
+        return ret_tra
+
+
 def pos_interp(trajectory, t_scale):
     ret_trajectory = []
     for row in range(trajectory.shape[0]):
