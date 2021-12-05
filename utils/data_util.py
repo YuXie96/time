@@ -27,6 +27,11 @@ def get_subset(data_set, inc_targets):
     return data_set
 
 
+def check_augment(augment):
+    assert type(augment) is tuple and len(augment) == 2
+    assert augment[1] > augment[0]
+
+
 class SkipTransform(object):
     def __init__(self, skip_num):
         assert type(skip_num) is int and skip_num >= 1
@@ -64,16 +69,16 @@ def clock_code(len_tra, width):
 
 
 class TemporalContext(object):
-    def __init__(self, context, width, t_scale):
+    def __init__(self, context, width):
         assert context in ['zero', 'noise', 'scalar', 'ramping',
                            'clock', 'stairs_end', 'stairs_start'],\
             'temporal context must be implemented'
         self.context = context
         assert width > 1, 'width must be greater than 1'
         self.width = width
-        self.t_scale = t_scale
 
-    def __call__(self, tra):
+    def __call__(self, tra_scale_tuple):
+        tra, t_scale = tra_scale_tuple
         tra_len = tra.shape[1]
         if self.context == 'zero':
             time_code = np.zeros((self.width, tra_len))
@@ -81,7 +86,7 @@ class TemporalContext(object):
             # might not be true random when using multiple worker to load data
             time_code = np.random.randn(self.width, tra_len)
         elif self.context == 'scalar':
-            time_code = np.ones((self.width, tra_len)) * self.t_scale
+            time_code = np.ones((self.width, tra_len)) * t_scale
         elif self.context == 'ramping':
             row_code = np.linspace(0, 1, tra_len)
             time_code = np.stack([row_code for w_ in range(self.width)])
@@ -109,31 +114,53 @@ def pos_interp(trajectory, t_scale):
     return np.stack(ret_trajectory)
 
 
+# remove the timescale from transform output
+class RemoveTScale(object):
+    def __call__(self, tra_scale_tuple):
+        return tra_scale_tuple[0]
+
+
 # stretch position data, linear interpolation
 class TimeScalePos(object):
-    def __init__(self, t_scale):
+    def __init__(self, t_scale, augment):
         self.t_scale = t_scale
+        if augment is not None:
+            check_augment(augment)
+        self.augment = augment
 
     def __call__(self, tra):
-        if self.t_scale == 1.0:
+        app_scale = self.t_scale
+        if self.augment is not None:
+            app_scale *= ((self.augment[1] - self.augment[0])
+                          * np.random.random_sample() + self.augment[0])
+
+        if app_scale == 1.0:
             ret_tra = tra
         else:
-            ret_tra = pos_interp(tra, t_scale=self.t_scale)
-        return ret_tra
+            ret_tra = pos_interp(tra, t_scale=app_scale)
+        return ret_tra, app_scale
 
 
 class TimeScaleVel(object):
-    def __init__(self, t_scale):
+    def __init__(self, t_scale, augment):
         self.t_scale = t_scale
+        if augment is not None:
+            check_augment(augment)
+        self.augment = augment
 
     def __call__(self, tra):
-        if self.t_scale == 1.0:
+        app_scale = self.t_scale
+        if self.augment is not None:
+            app_scale *= ((self.augment[1] - self.augment[0])
+                          * np.random.random_sample() + self.augment[0])
+
+        if app_scale == 1.0:
             ret_tra = tra
         else:
             pos_tra = np.cumsum(tra, axis=1)
-            int_pos_tra = pos_interp(pos_tra, t_scale=self.t_scale)
+            int_pos_tra = pos_interp(pos_tra, t_scale=app_scale)
             ret_tra = np.diff(int_pos_tra, axis=1, prepend=0)
-        return ret_tra
+        return ret_tra, app_scale
 
 
 # scale

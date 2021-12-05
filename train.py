@@ -32,7 +32,8 @@ def model_train(config):
     # initialize data loaders
     train_loader = data_init(mode='train', use_velocity=config.use_velocity,
                              t_scale=config.t_scale, batch_s=config.batch_s,
-                             context=config.context, context_w=config.context_w)
+                             context=config.context, context_w=config.context_w,
+                             augment=config.augment)
     test_loader = data_init(mode='test', use_velocity=config.use_velocity,
                             t_scale=config.t_scale, batch_s=config.batch_s,
                             context=config.context, context_w=config.context_w)

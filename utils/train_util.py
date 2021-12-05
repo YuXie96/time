@@ -5,7 +5,8 @@ from torch.utils.data import DataLoader
 
 from torchvision import transforms
 from utils.data_util import CharacterTrajectoriesDataset, pad_collate,\
-    SkipTransform, TrimZeros, CumSum, Scale, TimeScalePos, TimeScaleVel, TemporalContext
+    SkipTransform, TrimZeros, CumSum, Scale, TimeScalePos, TimeScaleVel,\
+    TemporalContext, RemoveTScale
 from models import RNNModel
 from configs.config_global import DEVICE, MAP_LOC
 
@@ -35,7 +36,11 @@ def grad_clipping(model, max_norm, printing=False):
             print("after: ", grad_after)
 
 
-def data_init(mode, use_velocity, t_scale, batch_s, context, context_w):
+def data_init(mode, use_velocity, t_scale, batch_s, context, context_w, augment=None):
+    if augment is not None:
+        assert mode == 'train', 'only apply augmentation during training'
+        print("apply data augmentation in the range of: ", augment)
+
     if mode == 'train':
         mode_flag = True
     elif mode == 'test':
@@ -47,13 +52,15 @@ def data_init(mode, use_velocity, t_scale, batch_s, context, context_w):
     # initialize dataset and data transforms
     if use_velocity:
         # classification based on velocity trajectory
-        transforms_list += [TimeScaleVel(t_scale)]
+        transforms_list += [TimeScaleVel(t_scale, augment)]
     else:
         # classification based on position trajectory
-        transforms_list += [CumSum(), Scale(scale=0.1), TimeScalePos(t_scale)]
+        transforms_list += [CumSum(), Scale(scale=0.1), TimeScalePos(t_scale, augment)]
 
     if context is not None:
-        transforms_list += [TemporalContext(context, context_w, t_scale)]
+        transforms_list += [TemporalContext(context, context_w)]
+    else:
+        transforms_list += [RemoveTScale()]
 
     trans = transforms.Compose(transforms_list)
     data_set = CharacterTrajectoriesDataset(large_split=mode_flag, transform=trans)

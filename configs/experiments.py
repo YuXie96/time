@@ -46,10 +46,35 @@ def timescale():
     config.experiment_name = 'timescale'
     config.rnn_type = 'plainRNN'
     config.t_scale = 1.0
+    config.augment = None
     config.use_velocity = False
     config.context = None
     config.context_w = 10
     config.hidden_size = 64
+
+    config_ranges = OrderedDict()
+    config_ranges['rnn_type'] = ['plainRNN',
+                                 'VanillaRNN',
+                                 'CTRNN',
+                                 'LSTM',
+                                 'GRU',
+                                 'RNNSTSP']
+    configs = vary_config(config, config_ranges, mode='combinatorial')
+    return configs
+
+
+def timescale_aug():
+    config = BaseConfig()
+    config.experiment_name = 'timescale_aug'
+    config.rnn_type = 'plainRNN'
+    config.t_scale = 1.0
+    config.augment = (0.5, 1.5)
+    config.use_velocity = False
+    config.context = None
+    config.context_w = 10
+    config.hidden_size = 64
+
+    config.num_ep = 40
 
     config_ranges = OrderedDict()
     config_ranges['rnn_type'] = ['plainRNN',
@@ -67,10 +92,31 @@ def timecode():
     config.experiment_name = 'timecode'
     config.rnn_type = 'plainRNN'
     config.t_scale = 1.0
+    config.augment = None
     config.use_velocity = False
     config.context = 'zero'
     config.context_w = 10
     config.hidden_size = 64
+
+    config_ranges = OrderedDict()
+    config_ranges['context'] = ['zero', 'noise', 'scalar', 'ramping',
+                                'clock', 'stairs_end', 'stairs_start']
+    configs = vary_config(config, config_ranges, mode='combinatorial')
+    return configs
+
+
+def timecode_aug():
+    config = BaseConfig()
+    config.experiment_name = 'timecode_aug'
+    config.rnn_type = 'plainRNN'
+    config.t_scale = 1.0
+    config.augment = (0.5, 1.5)
+    config.use_velocity = False
+    config.context = 'zero'
+    config.context_w = 10
+    config.hidden_size = 64
+
+    config.num_ep = 40
 
     config_ranges = OrderedDict()
     config_ranges['context'] = ['zero', 'noise', 'scalar', 'ramping',
@@ -99,8 +145,40 @@ def timescale_analysis():
         plots.plot_gen(t_scale_list, acc_list, cfg.rnn_type)
 
 
+def timescale_aug_analysis():
+    configs = timescale_aug()
+    init_analysis(configs)
+    t_scale_list = np.arange(0.1, 2, 0.1)
+    acc_list = np.zeros_like(t_scale_list)
+    for cfg in configs:
+        for i_s, t_scale in enumerate(t_scale_list):
+            new_cfg = copy.deepcopy(cfg)
+            new_cfg.t_scale = t_scale
+            acc_list[i_s] = evaluate.eval_total_acc(new_cfg)
+
+        np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
+        np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
+        plots.plot_gen(t_scale_list, acc_list, cfg.rnn_type)
+
+
 def timecode_analysis():
     configs = timecode()
+    init_analysis(configs)
+    t_scale_list = np.arange(0.1, 2, 0.1)
+    acc_list = np.zeros_like(t_scale_list)
+    for cfg in configs:
+        for i_s, t_scale in enumerate(t_scale_list):
+            new_cfg = copy.deepcopy(cfg)
+            new_cfg.t_scale = t_scale
+            acc_list[i_s] = evaluate.eval_total_acc(new_cfg)
+
+        np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
+        np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
+        plots.plot_gen(t_scale_list, acc_list, cfg.context)
+
+
+def timecode_aug_analysis():
+    configs = timecode_aug()
     init_analysis(configs)
     t_scale_list = np.arange(0.1, 2, 0.1)
     acc_list = np.zeros_like(t_scale_list)
