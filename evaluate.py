@@ -6,10 +6,15 @@ from utils.train_util import data_init, model_init
 def eval_total_acc(config):
     # initialize data loaders
     test_loader = data_init(mode='test', use_velocity=config.use_velocity,
-                            t_scale=config.t_scale, batch_s=config.batch_s)
-
+                            t_scale=config.t_scale, batch_s=config.batch_s,
+                            context=config.context, context_w=config.context_w)
     # initialize model
-    model = model_init(mode='test', model_type=config.rnn_type, save_path=config.save_path)
+    inp_size = 3
+    if config.context is not None:
+        inp_size += config.context_w
+    model = model_init(mode='test', model_type=config.rnn_type,
+                       input_size=inp_size, hidden_size=config.hidden_size,
+                       save_path=config.save_path)
 
     correct = 0
     total = 0
@@ -31,10 +36,16 @@ def eval_total_acc(config):
 def eval_class_acc(config):
     # initialize data loaders
     test_loader = data_init(mode='test', use_velocity=config.use_velocity,
-                            t_scale=config.t_scale, batch_s=config.batch_s)
+                            t_scale=config.t_scale, batch_s=config.batch_s,
+                            context=config.context, context_w=config.context_w)
 
     # initialize model
-    model = model_init(mode='test', model_type=config.rnn_type, save_path=config.save_path)
+    inp_size = 3
+    if config.context is not None:
+        inp_size += config.context_w
+    model = model_init(mode='test', model_type=config.rnn_type,
+                       input_size=inp_size, hidden_size=config.hidden_size,
+                       save_path=config.save_path)
 
     # prepare to count predictions for each class
     classes = char_list

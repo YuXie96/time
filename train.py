@@ -31,12 +31,18 @@ def model_train(config):
 
     # initialize data loaders
     train_loader = data_init(mode='train', use_velocity=config.use_velocity,
-                             t_scale=config.t_scale, batch_s=config.batch_s)
+                             t_scale=config.t_scale, batch_s=config.batch_s,
+                             context=config.context, context_w=config.context_w)
     test_loader = data_init(mode='test', use_velocity=config.use_velocity,
-                            t_scale=config.t_scale, batch_s=config.batch_s)
+                            t_scale=config.t_scale, batch_s=config.batch_s,
+                            context=config.context, context_w=config.context_w)
 
     # initialize model
-    model = model_init(mode='train', model_type=config.rnn_type)
+    inp_size = 3
+    if config.context is not None:
+        inp_size += config.context_w
+    model = model_init(mode='train', model_type=config.rnn_type,
+                       input_size=inp_size, hidden_size=config.hidden_size)
 
     # initialize training
     optimizer = torch.optim.Adam(model.parameters())

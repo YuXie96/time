@@ -47,6 +47,9 @@ def timescale():
     config.rnn_type = 'plainRNN'
     config.t_scale = 1.0
     config.use_velocity = False
+    config.context = None
+    config.context_w = 10
+    config.hidden_size = 64
 
     config_ranges = OrderedDict()
     config_ranges['rnn_type'] = ['plainRNN',
@@ -55,6 +58,23 @@ def timescale():
                                  'LSTM',
                                  'GRU',
                                  'RNNSTSP']
+    configs = vary_config(config, config_ranges, mode='combinatorial')
+    return configs
+
+
+def timecode():
+    config = BaseConfig()
+    config.experiment_name = 'timecode'
+    config.rnn_type = 'plainRNN'
+    config.t_scale = 1.0
+    config.use_velocity = False
+    config.context = 'zero'
+    config.context_w = 10
+    config.hidden_size = 64
+
+    config_ranges = OrderedDict()
+    config_ranges['context'] = ['zero', 'noise', 'scalar', 'ramping',
+                                'clock', 'stairs_end', 'stairs_start']
     configs = vary_config(config, config_ranges, mode='combinatorial')
     return configs
 
@@ -77,3 +97,19 @@ def timescale_analysis():
         np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
         np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
         plots.plot_gen(t_scale_list, acc_list, cfg.rnn_type)
+
+
+def timecode_analysis():
+    configs = timecode()
+    init_analysis(configs)
+    t_scale_list = np.arange(0.1, 2, 0.1)
+    acc_list = np.zeros_like(t_scale_list)
+    for cfg in configs:
+        for i_s, t_scale in enumerate(t_scale_list):
+            new_cfg = copy.deepcopy(cfg)
+            new_cfg.t_scale = t_scale
+            acc_list[i_s] = evaluate.eval_total_acc(new_cfg)
+
+        np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
+        np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
+        plots.plot_gen(t_scale_list, acc_list, cfg.context)

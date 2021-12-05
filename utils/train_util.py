@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from torchvision import transforms
 from utils.data_util import CharacterTrajectoriesDataset, pad_collate,\
-    SkipTransform, TrimZeros, CumSum, Scale, TimeScalePos, TimeScaleVel
+    SkipTransform, TrimZeros, CumSum, Scale, TimeScalePos, TimeScaleVel, TemporalContext
 from models import RNNModel
 from configs.config_global import DEVICE, MAP_LOC
 
@@ -35,7 +35,7 @@ def grad_clipping(model, max_norm, printing=False):
             print("after: ", grad_after)
 
 
-def data_init(mode, use_velocity, t_scale, batch_s):
+def data_init(mode, use_velocity, t_scale, batch_s, context, context_w):
     if mode == 'train':
         mode_flag = True
     elif mode == 'test':
@@ -43,20 +43,19 @@ def data_init(mode, use_velocity, t_scale, batch_s):
     else:
         raise NotImplementedError
 
+    transforms_list = [TrimZeros(), SkipTransform(skip_num=2)]
     # initialize dataset and data transforms
     if use_velocity:
         # classification based on velocity trajectory
-        trans = transforms.Compose([TrimZeros(),
-                                    SkipTransform(skip_num=2),
-                                    TimeScaleVel(t_scale)])
+        transforms_list += [TimeScaleVel(t_scale)]
     else:
         # classification based on position trajectory
-        trans = transforms.Compose([TrimZeros(),
-                                    SkipTransform(skip_num=2),
-                                    CumSum(),
-                                    Scale(scale=0.1),
-                                    TimeScalePos(t_scale)])
+        transforms_list += [CumSum(), Scale(scale=0.1), TimeScalePos(t_scale)]
 
+    if context is not None:
+        transforms_list += [TemporalContext(context, context_w, t_scale)]
+
+    trans = transforms.Compose(transforms_list)
     data_set = CharacterTrajectoriesDataset(large_split=mode_flag, transform=trans)
     data_loader = DataLoader(data_set, batch_size=batch_s, shuffle=mode_flag,
                              collate_fn=pad_collate, drop_last=True)
@@ -64,8 +63,8 @@ def data_init(mode, use_velocity, t_scale, batch_s):
     return data_loader
 
 
-def model_init(mode, model_type, save_path=None):
-    model = RNNModel(input_size=3, hidden_size=64,
+def model_init(mode, model_type, input_size, hidden_size, save_path=None):
+    model = RNNModel(input_size=input_size, hidden_size=hidden_size,
                      output_size=20, rnn_type=model_type)
     model = model.to(DEVICE)
 
