@@ -2,6 +2,7 @@ import os.path as osp
 
 import matplotlib.pyplot as plt
 import matplotlib
+import numpy as np
 
 from configs.config_global import FIG_DIR
 
@@ -86,3 +87,31 @@ def plot_gen(tscales, accs, append_str):
 
     plt.tight_layout(pad=0.5)
     plt.savefig(osp.join(FIG_DIR, 'time_scale_gen' + append_str + '.pdf'), transparent=True)
+
+
+def plot_group_gen(configs):
+    legend_list = []
+    t_scale_list = []
+    acc_list = []
+
+    for cfg in configs:
+        t_scale_list.append(np.load(osp.join(cfg.save_path, 'tscalelist.npy')))
+        acc_list.append(np.load(osp.join(cfg.save_path, 'acclist.npy')))
+        legend_list.append(cfg.rnn_type)
+
+    plt.figure()
+    for t_scale, acc in zip(t_scale_list, acc_list):
+        plt.plot(t_scale, acc)
+
+    plt.ylim([0, 100])
+    plt.xlabel('Time Scales')
+    plt.ylabel('Test Accuracy')
+    plt.legend(legend_list)
+
+    ax = plt.gca()
+    # Hide the right and top spines
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+
+    plt.tight_layout(pad=0.5)
+    plt.savefig(osp.join(FIG_DIR, 'time_scale_gen_all.pdf'), transparent=True)
