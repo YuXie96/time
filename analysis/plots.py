@@ -89,7 +89,7 @@ def plot_gen(tscales, accs, append_str):
     plt.savefig(osp.join(FIG_DIR, 'time_scale_gen' + append_str + '.pdf'), transparent=True)
 
 
-def plot_group_gen(configs):
+def plot_group_gen(configs, append_str, mode):
     legend_list = []
     t_scale_list = []
     acc_list = []
@@ -97,7 +97,12 @@ def plot_group_gen(configs):
     for cfg in configs:
         t_scale_list.append(np.load(osp.join(cfg.save_path, 'tscalelist.npy')))
         acc_list.append(np.load(osp.join(cfg.save_path, 'acclist.npy')))
-        legend_list.append(cfg.rnn_type)
+        if mode == 'rnn_type':
+            legend_list.append(cfg.rnn_type)
+        elif mode == 'context':
+            legend_list.append(cfg.context)
+        else:
+            raise NotImplementedError
 
     plt.figure()
     for t_scale, acc in zip(t_scale_list, acc_list):
@@ -114,4 +119,4 @@ def plot_group_gen(configs):
     ax.spines['top'].set_visible(False)
 
     plt.tight_layout(pad=0.5)
-    plt.savefig(osp.join(FIG_DIR, 'time_scale_gen_all.pdf'), transparent=True)
+    plt.savefig(osp.join(FIG_DIR, 'time_scale_gen_all' + append_str + '.pdf'), transparent=True)

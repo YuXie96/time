@@ -54,7 +54,6 @@ def timescale():
 
     config_ranges = OrderedDict()
     config_ranges['rnn_type'] = ['plainRNN',
-                                 'VanillaRNN',
                                  'CTRNN',
                                  'LSTM',
                                  'GRU',
@@ -78,7 +77,6 @@ def timescale_aug():
 
     config_ranges = OrderedDict()
     config_ranges['rnn_type'] = ['plainRNN',
-                                 'VanillaRNN',
                                  'CTRNN',
                                  'LSTM',
                                  'GRU',
@@ -143,6 +141,7 @@ def timescale_analysis():
         np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
         np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
         plots.plot_gen(t_scale_list, acc_list, cfg.rnn_type)
+    plots.plot_group_gen(configs, configs[0].experiment_name, mode='rnn_type')
 
 
 def timescale_aug_analysis():
@@ -159,6 +158,7 @@ def timescale_aug_analysis():
         np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
         np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
         plots.plot_gen(t_scale_list, acc_list, cfg.rnn_type)
+    plots.plot_group_gen(configs, configs[0].experiment_name, mode='rnn_type')
 
 
 def timecode_analysis():
@@ -175,6 +175,7 @@ def timecode_analysis():
         np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
         np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
         plots.plot_gen(t_scale_list, acc_list, cfg.context)
+    plots.plot_group_gen(configs, configs[0].experiment_name, mode='context')
 
 
 def timecode_aug_analysis():
@@ -191,3 +192,4 @@ def timecode_aug_analysis():
         np.save(os.path.join(cfg.save_path, 'tscalelist.npy'), t_scale_list)
         np.save(os.path.join(cfg.save_path, 'acclist.npy'), acc_list)
         plots.plot_gen(t_scale_list, acc_list, cfg.context)
+    plots.plot_group_gen(configs, configs[0].experiment_name, mode='context')
