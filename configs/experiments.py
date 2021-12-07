@@ -52,6 +52,8 @@ def timescale():
     config.context_w = 10
     config.hidden_size = 64
 
+    config.num_ep = 40
+
     config_ranges = OrderedDict()
     config_ranges['rnn_type'] = ['plainRNN',
                                  'CTRNN',
@@ -95,6 +97,8 @@ def timecode():
     config.context = 'zero'
     config.context_w = 10
     config.hidden_size = 64
+
+    config.num_ep = 40
 
     config_ranges = OrderedDict()
     config_ranges['context'] = ['zero', 'noise', 'scalar', 'ramping',
