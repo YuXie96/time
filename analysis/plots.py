@@ -120,3 +120,48 @@ def plot_group_gen(configs, append_str, mode):
 
     plt.tight_layout(pad=0.5)
     plt.savefig(osp.join(FIG_DIR, 'time_scale_gen_all' + append_str + '.pdf'), transparent=True)
+
+
+def plot_group_total_gen(configs, append_str, mode):
+    legend_list = []
+    t_scale_list = []
+    acc_list = []
+
+    for cfg in configs:
+        t_scale_list.append(np.load(osp.join(cfg.save_path, 'tscalelist.npy')))
+        acc_list.append(np.load(osp.join(cfg.save_path, 'acclist.npy')))
+        if mode == 'rnn_type':
+            legend_list.append(cfg.rnn_type)
+        elif mode == 'context':
+            legend_list.append(cfg.context)
+        else:
+            raise NotImplementedError
+
+    t_scale_len_list = [len(t_s) for t_s in t_scale_list]
+    assert all([t_s_l == t_scale_len_list[0] for t_s_l in t_scale_len_list])
+
+    total_acc_list = [np.mean(accs) for accs in acc_list]
+    idxs = np.argsort(total_acc_list)
+    total_acc_sorted = []
+    legend_sorted = []
+    for id_ in idxs:
+        total_acc_sorted.append(total_acc_list[id_])
+        legend_sorted.append(legend_list[id_])
+
+    x_axis = np.arange(len(legend_list))
+
+    plt.figure()
+    plt.bar(x_axis, total_acc_sorted)
+
+    plt.ylim([0, 100])
+    plt.ylabel('Test Accuracy')
+    plt.xticks(x_axis, legend_sorted)
+    plt.title('Averaged Generalization Performance')
+
+    ax = plt.gca()
+    # Hide the right and top spines
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+
+    plt.tight_layout(pad=0.5)
+    plt.savefig(osp.join(FIG_DIR, 'time_scale_gen_all' + append_str + '.pdf'), transparent=True)
